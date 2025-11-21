@@ -5,13 +5,9 @@ let ai: GoogleGenAI | null = null;
 let chatSession: Chat | null = null;
 
 export const initializeGemini = () => {
-  if (!process.env.API_KEY) {
-    console.error("API_KEY is missing in environment variables.");
-    return;
-  }
-  
   try {
     // Initialize the GoogleGenAI client with the API key
+    // The API key must be obtained exclusively from the environment variable process.env.API_KEY
     ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   } catch (error) {
     console.error("Failed to initialize GoogleGenAI client:", error);
@@ -36,7 +32,7 @@ export const startChat = async (): Promise<void> => {
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         temperature: 0.7,
-        maxOutputTokens: 8192, // Ensure sufficient tokens for JSON responses
+        // Removed maxOutputTokens as it should be paired with thinkingBudget or avoided
         tools: [
           { googleSearch: {} }
         ]
@@ -58,7 +54,7 @@ export const sendMessage = async (message: string): Promise<string> => {
     // Attempt one retry
     await startChat();
     if (!chatSession) {
-      return "I'm currently experiencing connection issues. Please check your internet connection or try again later.";
+      return "I'm currently experiencing connection issues or the API Key is missing. Please check your settings.";
     }
   }
 
